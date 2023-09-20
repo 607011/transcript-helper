@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ABC Transcript Helper</title>
+    <meta charset="utf-8">
+    <script async src="static/js/spark-md5.min.js"></script>
+    <script async src="index.js"></script>
+    <style id="vars">
+        :root {
+            --text-color: #000;
+            --background-color: #e5f8b0;
+            --border-color: #859a5d;
+            --button-color: #a0cb51;
+            --symbol-scale: 3;
+        }
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #app {
+            margin: 4px 10px;
+        }
+
+        #symbols,
+        #secret-doc,
+        #transcript,
+        #solution {
+            position: relative;
+            min-height: 44px;
+            width: 100%;
+            padding: 4px;
+            border-color: var(--border-color);
+            border-width: 2px;
+            border-style: solid;
+            margin: 3px 0 10px 0;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        #symbols {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            writing-mode: initial;
+        }
+
+        #symbols.dragging {
+            outline: 2px dotted rgba(227, 11, 11, 0.809);
+        }
+
+        #symbols>img {
+            display: inline-block;
+            margin-right: 4px;
+            border-color: var(--border-color);
+            border-width: 1px;
+            border-style: solid;
+            width: fit-content;
+            height: fit-content;
+            cursor: pointer;
+        }
+
+        #symbols>span {
+            display: inline-block;
+            margin-right: 4px;
+            border-color: var(--border-color);
+            border-width: 1px;
+            border-style: solid;
+            width: fit-content;
+            height: fit-content;
+            cursor: pointer;
+            background-size: cover;
+        }
+
+        #secret-doc {
+            overflow-y: scroll;
+            overflow-wrap: break-word;
+            caret-color: red;
+            font-size: 22px;
+        }
+
+        #secret-doc>* {
+            display: inline-block;
+            width: fit-content;
+            height: fit-content;
+            background-size: cover;
+        }
+
+        button {
+            padding: 5px 10px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            background-color: var(--button-color);
+        }
+
+        button.char {
+            display: inline-block;
+            font-size: 20px;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            vertical-align: text-bottom;
+        }
+
+        #transcript,
+        #solution {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            overflow: scroll;
+            padding: 4px;
+        }
+
+        select {
+            padding: 4px;
+            border: 2px solid var(--border-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>ABC Transcript Helper</h1>
+        <div>Symbols</div>
+        <div id="symbols"></div>
+        <div>
+            <button class="char" id="cr" title="Insert line break at current position">⏎</button>
+            <button class="char" id="space" title="Insert space at current position">⎵</button>
+        </div>
+        <br>
+        <div>Click symbols above to create secret document</div>
+        <div style="text-align: right;">
+            <form id="direction">
+                <input type="radio" name="direction" value="initial" />&nbsp;initial
+                <input type="radio" name="direction" value="horizontal-tb" />&nbsp;htb
+                <input type="radio" name="direction" value="sideways-lr" />&nbsp;slr
+                <input type="radio" name="direction" value="sideways-rl" />&nbsp;srl
+                <input type="radio" name="direction" value="vertical-lr" />&nbsp;vlr
+                <input type="radio" name="direction" value="vertical-rl" />&nbsp;vrl
+            </form>
+        </div>
+        <div id="secret-doc"></div>
+        <div><button id="generate-transcript">Generate transcript</button></div>
+        <div>Generated ABC Transcript</div>
+        <div id="transcript"></div>
+        <div>
+            <button id="solve">Solve</button>
+            <select name="language">
+                <option value="de">Deutsch</option>
+            </select>
+        </div>
+        <div>Possible solution</div>
+        <div id="solution">
+
+        </div>
+    </div>
+</body>
+
+</html>

@@ -30,7 +30,6 @@ import('./static/js/spark-md5.min.js');
         static Direction = 'transcriptor.direction';
     };
     const el = {};
-    const SYMBOLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345679ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ一丁丂七丄丅丆万丈三上下丌不与丏丐丑丒专且丕世丗丘丙业丛东丝丞丟丠両丢丣两严並丧丨丩个丫丬中丮丯丰丱串丳临丵丶丷丸丹为主丼丽举丿乀乁乂乃乄久乆乇么义乊之乌乍乎乏乐乑乒乓乔乕乖乗乘乙乚乛乜九乞也习乡乢乣乤乥书乧乨乩乪乫乬乭乮乯买乱乲乳乴乵乶乷乸乹乺乻乼乽乾乿亀亁亂亃亄亅了亇予争亊事二亍于亏亐云互亓五井亖亗亘亙亚些亜亝亞亟亠亡亢亣交亥亦产亨亩亪享京亭亮亯亰亱亲亳亴亵亶亷亸亹人亻亼亽亾亿什仁仂仃仄仅仆仇仈仉今介仌仍从仏仐仑仒仓仔仕他仗付仙仚仛仜仝仞仟仠仡仢代令以仦仧仨仩仪仫们仭仮仯仰仱仲仳仴仵件价仸仹仺任仼份仾仿伀企伂伃伄伅伆伇伈伉伊伋伌伍伎伏伐休伒伓伔伕伖众优伙会伛伜伝伞伟传伡伢伣伤伥伦伧伨伩伪伫伬伭伮伯估伱伲伳伴伵伶伷伸伹伺伻似伽伾伿佀佁佂佃佄佅但佇佈佉佊佋佌位低住佐佑佒体佔何佖佗佘余佚佛作佝佞佟你佡佢佣佤佥佦佧佨佩佪佫佬佭佮佯佰佱佲佳佴併佶佷佸佹佺佻佼佽佾使侀侁侂侃侄侅來侇侈侉侊例侌侍侎侏侐侑侒侓侔侕侖侗侘侙侚供侜依侞侟侠価侢侣侤侥侦侧侨侩侪侫侬侭侮侯侰侱侲侳侴侵侶侷侸侹侺侻侼侽侾便俀俁係促俄俅俆俇俈俉俊俋俌俍俎俏俐俑俒俓俔俕俖俗俘俙俚俛俜保俞俟俠信俢俣俤俥俦俧俨俩俪俫俬俭修俯俰俱俲俳俴俵俶俷俸俹俺俻俼俽俾俿';
     const SUPPORTED_TYPES = ['image/png', 'image/jpeg'];
     let undoHistory = new UndoHistory;
 
@@ -41,6 +40,7 @@ import('./static/js/spark-md5.min.js');
             clone.remove();
         }));
         localStorage.setItem(StorageKey.SecretDoc, el.secretDoc.innerHTML);
+        generateTranscript();
     }
 
     function undo() {
@@ -87,6 +87,7 @@ import('./static/js/spark-md5.min.js');
                     typeSymbol(span);
                 });
                 el.symbols.appendChild(span);
+                el.numSymbols.textContent = el.symbols.childNodes.length;
                 undoHistory.add(new Undoable(function () {
                     span.remove();
                 }));
@@ -102,6 +103,10 @@ import('./static/js/spark-md5.min.js');
 
     function addSpace() {
         el.secretDoc.appendChild(document.createTextNode(' '));
+    }
+
+    function onAlphabetChange() {
+        generateTranscript();
     }
 
     function onSymbolPaste(e) {
@@ -126,6 +131,7 @@ import('./static/js/spark-md5.min.js');
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
     }
+
     function onSymbolDrop(e) {
         for (const item of e.dataTransfer.items) {
             processItemAsSymbol(item);
@@ -137,8 +143,11 @@ import('./static/js/spark-md5.min.js');
     function generateTranscript() {
         const hashes = {};
         let idx = 0;
-        for (const img of el.symbols.querySelectorAll('span')) {
-            hashes[img.id] = SYMBOLS[idx++];
+        const alphabet = el.alphabet.value;
+        for (const img of el.secretDoc.querySelectorAll('span')) {
+            if (!Object.keys(hashes).includes(img.id)) {
+                hashes[img.id] = String.fromCodePoint(alphabet.codePointAt(idx++));
+            }
         }
         let transcript = '';
         for (const symbol of el.secretDoc.childNodes) {
@@ -154,14 +163,17 @@ import('./static/js/spark-md5.min.js');
                     c = symbol.nodeValue;
                     break;
                 default:
-                    console.error(`Invalid symbol type: "${symbol.nodeName}"`);
+                    console.warn(`Invalid symbol type: "${symbol.nodeName}"`, symbol);
                     break;
             }
             if (c) {
                 transcript += c;
             }
         }
-        el.transcript.textContent = transcript;
+        el.numDifferentSymbols.textContent = idx;
+        el.transcript.value = transcript;
+        el.alphabetUsed.textContent = Object.values(hashes).sort().join('');
+        console.assert(idx === Object.keys(hashes).length);
     }
 
     function main() {
@@ -172,6 +184,12 @@ import('./static/js/spark-md5.min.js');
         el.symbols.addEventListener('dragover', onSymbolDragOver);
         el.symbols.addEventListener('dragleave', onSymbolDragLeave);
         el.symbols.addEventListener('drop', onSymbolDrop);
+        el.numSymbols = document.querySelector('#num-symbols');
+        el.numSymbols.textContent = el.symbols.childNodes.length
+        el.numDifferentSymbols = document.querySelector('#num-different-symbols');
+        el.alphabet = document.querySelector('#alphabet');
+        el.alphabet.addEventListener('input', onAlphabetChange);
+        el.alphabetUsed = document.querySelector('#alphabet-used');
         el.secretDoc = document.querySelector('#secret-doc');
         el.secretDoc.innerHTML = localStorage.getItem(StorageKey.SecretDoc) || '';
         el.secretDoc.setAttribute('contenteditable', true);
@@ -193,13 +211,14 @@ import('./static/js/spark-md5.min.js');
                 typeSymbol(node);
             });
         }
-        document.querySelector('button#generate-transcript').addEventListener('click', generateTranscript);
+        // document.querySelector('button#generate-transcript').addEventListener('click', generateTranscript);
         document.querySelector('button#cr').addEventListener('click', addCR);
         document.querySelector('button#space').addEventListener('click', addSpace);
         window.addEventListener('paste', onSymbolPaste);
         window.addEventListener('pagehide', onPageHide);
         window.addEventListener('blur', onPageHide);
         window.addEventListener('keydown', onKeyDown);
+        generateTranscript();
     }
     document.querySelector(`input[name="direction"][value="${localStorage.getItem(StorageKey.Direction) || 'sideways-lr'}"]`).checked = true;
     window.addEventListener('load', main);

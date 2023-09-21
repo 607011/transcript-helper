@@ -35,8 +35,9 @@
 
         #symbols,
         #secret-doc,
-        #transcript,
-        #solution {
+        #alphabet,
+        #alphabet-used,
+        #transcript {
             position: relative;
             min-height: 44px;
             width: 100%;
@@ -115,7 +116,10 @@
             vertical-align: text-bottom;
         }
 
-        #transcript,
+        #transcript {
+            height: 20vh;
+        }
+
         #solution {
             font-family: 'Courier New', Courier, monospace;
             white-space: pre;
@@ -133,14 +137,14 @@
 <body>
     <div id="app">
         <h1>ABC Transcript Helper</h1>
-        <div>Symbols</div>
+        <div>Symbols (<span id="num-symbols">0</span>)</div>
         <div id="symbols"></div>
         <div>
             <button class="char" id="cr" title="Insert line break at current position">⏎</button>
             <button class="char" id="space" title="Insert space at current position">⎵</button>
         </div>
         <br>
-        <div>Click symbols above to create secret document</div>
+        <div>Click symbols above to create secret document below</div>
         <div style="text-align: right;">
             <form id="direction">
                 <input type="radio" name="direction" value="initial" />&nbsp;initial
@@ -152,18 +156,17 @@
             </form>
         </div>
         <div id="secret-doc"></div>
-        <div><button id="generate-transcript">Generate transcript</button></div>
-        <div>Generated ABC Transcript</div>
-        <div id="transcript"></div>
+        <div>Ciphertext alphabet</div>
         <div>
-            <button id="solve">Solve</button>
-            <select name="language">
-                <option value="de">Deutsch</option>
-            </select>
+            <textarea id="alphabet">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345679ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ</textarea>
         </div>
-        <div>Possible solution</div>
-        <div id="solution">
-
+        <div>Generated ABC Transcript</div>
+        <div>
+            <textarea id="transcript"></textarea>
+        </div>
+        <div><span id="num-different-symbols">0</span> different symbols used</div>
+        <div>
+            <textarea id="alphabet-used"></textarea>
         </div>
     </div>
 </body>
